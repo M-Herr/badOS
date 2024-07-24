@@ -1,0 +1,7 @@
+*.o
+kernel/build/*
+.vscode
+badOS
+badOS.elf
+*.img
+boot
