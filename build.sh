@@ -1,22 +1,35 @@
-(cd src/bootloader; nasm -o boot boot.asm)
-boot_result=$?
+# Download the latest Limine binary release for the 7.x branch.
+git clone https://github.com/limine-bootloader/limine.git --branch=v7.x-binary --depth=1
 
-(cd src/kernel; make)
-make_result=$?
+# Build "limine" utility.
+make -C limine
 
-echo Make Result: $make_result
+# Create a directory which will be our ISO root.
+mkdir -p iso_root
 
-if [ "$boot_result" = "0" ] && [ "$make_result" = "0" ]
+# Copy the relevant files over.
+rm -rf iso_root/boot
+mkdir -p iso_root/boot
+cp -v bin/bados iso_root/boot/
+mkdir -p iso_root/boot/limine
+cp -v bootloader/limine/limine.cfg limine/limine-bios.sys limine/limine-bios-cd.bin \
+      limine/limine-uefi-cd.bin iso_root/boot/limine/
 
-then
-    cp src/bootloader/boot ./os.img
-    cat src/kernel/badOS >> os.img
-    fsize=$(wc -c < os.img)
-    sectors=$(($fsize/512))
+# Create the EFI boot tree and copy Limine's EFI executables over.
+mkdir -p iso_root/EFI/BOOT
+cp -v limine/BOOTX64.EFI iso_root/EFI/BOOT/
+cp -v limine/BOOTIA32.EFI iso_root/EFI/BOOT/
 
-    echo "Build finished successfully"
-    echo "ALERT: Adjust boot sector to load $sectors sectors"
-else
-    result=`expr $boot_result + $make_result`
-    echo "Build failed with error code $result. See output for more info."
-fi
+# Create the bootable ISO.
+xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        --efi-boot boot/limine/limine-uefi-cd.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        iso_root -o image.iso
+
+cp bootloader/limine/limine.cfg iso_root/boot/limine.cfg
+
+# Install Limine stage 1 and 2 for legacy BIOS boot.
+./limine/limine bios-install image.iso
+
+rm -rf iso_root
