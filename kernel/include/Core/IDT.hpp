@@ -9,7 +9,6 @@ class InterruptDescriptorTable
     public:
     constexpr static size_t number_of_entries = 256;
     
-
     public:
     InterruptDescriptorTable();
 

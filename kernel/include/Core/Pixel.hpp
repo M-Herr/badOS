@@ -2,15 +2,15 @@
 
 #include <Core/Drawable.hpp>
 
-
-class Pixel : public Drawable
+class Pixel 
 {
     public:
    
     public:
     Pixel();
     ~Pixel();
-    virtual void draw() override;
+    
+    void draw();
 
     private:
 

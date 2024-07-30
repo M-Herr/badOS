@@ -17,5 +17,5 @@ void FrameBuffer::add_drawable(Drawable* in_drawable)
 
 void FrameBuffer::draw_frame()
 {
-
-};
+    
+}

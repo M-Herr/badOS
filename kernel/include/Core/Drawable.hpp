@@ -5,8 +5,8 @@
 class Drawable 
 {
     public:
-    Drawable();
-    ~Drawable();
+    Drawable() = default;
+    virtual ~Drawable() = default;
 
     virtual void draw() = 0;
 

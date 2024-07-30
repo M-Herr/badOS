@@ -9,6 +9,7 @@
 	
 typedef unsigned uarch_t;
 
+
 struct atexit_func_entry_t
 {
 	/*
@@ -22,6 +23,7 @@ struct atexit_func_entry_t
 
 extern "C" void _Unwind_Resume();
 extern "C" void __gxx_personality_v0();
+extern "C" void __cxa_pure_virtual();
 
 int __cxa_atexit(void (*f)(void *), void *objptr, void *dso);
 void __cxa_finalize(void *f);

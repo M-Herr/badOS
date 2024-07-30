@@ -1,4 +1,5 @@
 #pragma once
+#define USE_LIMINE
 
 using uint8_t = unsigned char;
 using uint16_t = unsigned short;

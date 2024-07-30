@@ -54,7 +54,9 @@ extern "C" {
     
     void kernel_main()
     {
-            
+        
+        
+
             // Ensure the bootloader actually understands our base revision (see spec).
         if (LIMINE_BASE_REVISION_SUPPORTED == false) {
             hcf();
@@ -67,14 +69,20 @@ extern "C" {
         }
 
         // Fetch the first framebuffer.
-        //struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-
+        struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+        
+        kernel.get_framebuffer_properties(framebuffer);
+        
         if(memorymap_request.response == nullptr
         || memorymap_request.response->entry_count < 1)
         {
             hcf();
         }
         
+        kernel.intialize_gdt();
+
+        kernel.initialize_idt();
+
         kernel.run();
 
         // We're done, just hang...

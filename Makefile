@@ -7,12 +7,12 @@ override KERNEL := bados
 
 # Convenience macro to reliably declare user overridable variables.
 define DEFAULT_VAR =
-    ifeq ($(origin $1),default)
-        override $(1) := $(2)
-    endif
-    ifeq ($(origin $1),undefined)
-        override $(1) := $(2)
-    endif
+	ifeq ($(origin $1),default)
+		override $(1) := $(2)
+	endif
+	ifeq ($(origin $1),undefined)
+		override $(1) := $(2)
+	endif
 endef
 
 # It is suggested to use a custom built cross toolchain to build a kernel.
@@ -26,7 +26,7 @@ override DEFAULT_KLD := ld.lld
 $(eval $(call DEFAULT_VAR,KLD,$(DEFAULT_KLD)))
 
 # User controllable C flags.
-override DEFAULT_KCFLAGS := -g -O2 -pipe
+override DEFAULT_KCFLAGS := -g  -pipe
 $(eval $(call DEFAULT_VAR,KCFLAGS,$(DEFAULT_KCFLAGS)))
 
 # User controllable C preprocessor flags. We set none by default.
@@ -43,72 +43,94 @@ $(eval $(call DEFAULT_VAR,KLDFLAGS,$(DEFAULT_KLDFLAGS)))
 
 # Internal C flags that should not be changed by the user.
 override KCFLAGS += \
-    -Wall \
-    -Wextra \
-    -std=gnu11 \
-    -ffreestanding \
-    -fno-stack-protector \
-    -fno-stack-check \
-    -fno-lto \
-    -fPIE \
-    -m64 \
-    -march=x86-64 \
-    -mno-80387 \
-    -mno-mmx \
-    -mno-sse \
-    -mno-sse2 \
-    -mno-red-zone \
-    -fPIC
+	-g \
+	-Wall \
+	-Wextra \
+	-std=gnu11 \
+	-ffreestanding \
+	-fno-stack-protector \
+	-fno-stack-check \
+	-fno-lto \
+	-fPIE \
+	-m64 \
+	-march=x86-64 \
+	-mno-80387 \
+	-mno-mmx \
+	-mno-sse \
+	-mno-sse2 \
+	-mno-red-zone \
+	-fPIC \
+	-O0
 
 # Internal C preprocessor flags that should not be changed by the user.
 override KCPPFLAGS := \
-    -Ikernel \
-    -I \
-    $(KCPPFLAGS) \
-    -MMD \
-    -MP
+	-Ikernel \
+	-I \
+	$(KCPPFLAGS) \
+	-MMD \
+	-MP
 
 override KCXXFLAGS += \
-    -Wall \
-    -Wextra \
+	-g \
+	-Wall \
+	-Wextra \
 	-std=gnu++2b \
-    -ffreestanding \
-    -fno-stack-protector \
-    -fno-stack-check \
-    -fno-lto \
-    -fPIE \
-    -m64 \
-    -march=x86-64 \
-    -mno-80387 \
-    -mno-mmx \
-    -mno-sse \
-    -mno-sse2 \
-    -mno-red-zone \
+	-ffreestanding \
+	-fno-stack-protector \
+	-fno-stack-check \
+	-fno-lto \
+	-fPIE \
+	-m64 \
+	-march=x86-64 \
+	-mno-80387 \
+	-mno-mmx \
+	-mno-sse \
+	-mno-sse2 \
+	-mno-red-zone \
 	-Ikernel/include \
-    -fPIC \
-    -I. \
+	-fPIC \
+	-I. \
+	-fno-rtti \
+	-fno-exceptions \
+	-O0
 
 # Internal linker flags that should not be changed by the user.
 override KLDFLAGS += \
-    -m elf_x86_64 \
-    -nostdlib \
-    -z text \
-    -z max-page-size=0x1000 \
-    -T bootloader/limine/linker.ld
+	-m elf_x86_64 \
+	-nostdlib \
+	-z text \
+	-z max-page-size=0x1000 \
+	-T bootloader/limine/linker.ld
 
 # Internal nasm flags that should not be changed by the user.
 override KNASMFLAGS += \
-    -Wall \
-    -f elf64 
+	-g \
+	-O0 \
+	-Wall \
+	-f elf64 
 
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
 override CFILES := $(shell cd kernel && find -L * -type f -name '*.c')
 override CXXFILES := $(shell cd kernel && find -L * -type f -name '*.cpp')
 override ASFILES := $(shell cd kernel && find -L * -type f -name '*.S')
-override NASMFILES := $(shell cd kernel && find -L * -type f -name '*.asm')
-override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o) $(CXXFILES:.cpp=.cpp.o))
+
+override NASMFILES := $(shell cd kernel/ASM/non_abi && find -L * -type f -name '*.asm')
+override NASM_OBJS := $(addprefix obj/ASM/non_abi/, $(NASMFILES:.asm=.asm.o))
+
+override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(CXXFILES:.cpp=.cpp.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d) $(CXXFILES:.cpp=.cpp.d))
+
+
+CRTI_FILE := $(addprefix kernel/ASM/abi/global_constructors/, $(shell cd kernel/ASM/abi/global_constructors && find -L * -type f -name crti.asm))
+CRTN_FILE := $(addprefix kernel/ASM/abi/global_constructors/, $(shell cd kernel/ASM/abi/global_constructors && find -L * -type f -name crtn.asm))
+
+CRTI_OBJ =  $(addprefix obj/, $(CRTI_FILE:.asm=.asm.o))
+CRTN_OBJ =  $(addprefix obj/, $(CRTN_FILE:.asm=.asm.o))
+
+OBJECTS = $(CRTI_OBJ) $(NASM_OBJS) $(OBJ) $(CRTN_OBJ)
+#$(info $(NASMFILES))
+#$(error $(NASM_OBJS))
 
 # Default target.
 .PHONY: all
@@ -119,11 +141,11 @@ all: bin/$(KERNEL)
 # GNU binutils, for silly reasons, forces the ELF type to ET_EXEC even for
 # relocatable PIEs, if the base load address is non-0.
 # See https://sourceware.org/bugzilla/show_bug.cgi?id=31795 for more information.
-bin/$(KERNEL): bootloader/limine/linker.ld $(OBJ)
+bin/$(KERNEL): bootloader/limine/linker.ld $(OBJECTS)
 	mkdir -p "$$(dirname $@)"
-	$(KLD) $(OBJ) $(KLDFLAGS) -o $@
-	printf '\003' | dd of=$@ bs=1 count=1 seek=16 conv=notrunc 2>/dev/null
-
+	$(KLD) $(OBJECTS) $(KLDFLAGS) -o $@
+#printf '\003' | dd of=$@ bs=1 count=1 seek=16 conv=notrunc 2>/dev/null
+#$(error $(NASM_OBJS))
 # Include header dependencies.
 -include $(HEADER_DEPS)
 
@@ -142,7 +164,15 @@ obj/%.S.o: kernel/%.S
 	$(KCC) $(KCFLAGS) $(KCPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.asm (nasm) files.
-obj/%.asm.o: kernel/%.asm
+obj/ASM/non_abi/%.asm.o: kernel/ASM/non_abi/%.asm
+	mkdir -p "$$(dirname $@)"
+	nasm $(KNASMFLAGS) $< -o $@
+
+obj/kernel/ASM/abi/global_constructors/crti.asm.o: kernel/ASM/abi/global_constructors/crti.asm
+	mkdir -p "$$(dirname $@)"
+	nasm $(KNASMFLAGS) $< -o $@
+
+obj/kernel/ASM/abi/global_constructors/crtn.asm.o: kernel/ASM/abi/global_constructors/crtn.asm
 	mkdir -p "$$(dirname $@)"
 	nasm $(KNASMFLAGS) $< -o $@
 

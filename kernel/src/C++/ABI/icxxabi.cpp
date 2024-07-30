@@ -26,7 +26,10 @@ extern "C" void _Unwind_Resume() {
 extern "C" void __gxx_personality_v0() {
 	while(1) {}
 }
-
+extern "C" void __cxa_pure_virtual()
+{
+    // Do nothing or print an error message.
+}
 void __cxa_finalize(void *f)
 {
 	uarch_t i = __atexit_func_count;

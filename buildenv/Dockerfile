@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7,9 +7,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y \
     build-essential \
-    clang \
-    llvm \
-    lld \
+    clang-15 \
+    llvm-15 \
+    lld-15 \
     nasm \
     qemu \
     git \
@@ -26,6 +26,7 @@ RUN apt-get update && \
     grub-pc-bin \
     grub-efi-amd64-bin \
     xorriso \
+    cmake \
     mtools
 
 VOLUME /root/env

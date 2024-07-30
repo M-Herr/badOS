@@ -32,5 +32,5 @@ void InterruptDescriptorTable::load()
         idt_ptr.limit = sizeof(IDTEntry) * number_of_entries - 1;
         idt_ptr.base = reinterpret_cast<uint64_t>(&idt_entries);
 
-        asm volatile ("lidt (%0)" : : "r" (&idt_ptr));
+        asm("lidt (%0)" : : "r" (&idt_ptr));
 }
