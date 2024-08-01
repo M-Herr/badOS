@@ -5,6 +5,6 @@ extern "C"
 {
     void default_isr_handler()
     {
-        __asm__ volatile ("cli; hlt");
+        //__asm__ volatile ("cli; hlt");
     }
 }

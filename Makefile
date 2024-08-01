@@ -74,7 +74,7 @@ override KCXXFLAGS += \
 	-g \
 	-Wall \
 	-Wextra \
-	-std=gnu++2b \
+	-std=gnu++20 \
 	-ffreestanding \
 	-fno-stack-protector \
 	-fno-stack-check \

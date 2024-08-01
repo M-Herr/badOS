@@ -54,34 +54,39 @@ The GDT register is loaded to point to a GDT, in bootloader-reclaimable memory, 
 void Kernel::intialize_gdt()
 {   
     GDT::SegmentOptions null_segment_options;
+    gdt.configure(GDT::DescriptorTable::SegmentLabel::Null, null_segment_options);
 
     GDT::SegmentOptions kernel_code_segment_options;
-    kernel_code_segment_options.base = 0;
-    kernel_code_segment_options.limit = 0xFFFF; // Big number
-    kernel_code_segment_options.descriptor_type = GDT::DescriptorType::CodeOrData;
-    kernel_code_segment_options.granularity = GDT::Granularity::FourKilobytes;
-    kernel_code_segment_options.long_mode = GDT::LongMode::Enabled;
-    kernel_code_segment_options.operation_size = GDT::OperationSize::Bits16;
-    kernel_code_segment_options.present = GDT::Present::Yes;
-    kernel_code_segment_options.privilege_level = GDT::PrivilegeLevel::Ring0;
+    kernel_code_segment_options.base                = 0;
+    kernel_code_segment_options.limit               = 0xFFFF; // Big number
+    kernel_code_segment_options.descriptor_type     = GDT::DescriptorType::CodeOrData;
+    kernel_code_segment_options.granularity         = GDT::Granularity::FourKilobytes;
+    kernel_code_segment_options.long_mode           = GDT::LongMode::Enabled;
+    kernel_code_segment_options.operation_size      = GDT::OperationSize::Bits16;
+    kernel_code_segment_options.present             = GDT::Present::Yes;
+    kernel_code_segment_options.privilege_level     = GDT::PrivilegeLevel::Ring0;
     kernel_code_segment_options.system_availability = GDT::SystemAvailability::NotAvailable;
-    kernel_code_segment_options.segment_type = GDT::SegmentType::Code;
-    kernel_code_segment_options.code_segment = GDT::CodeSegmentType::ExecuteRead;
+    kernel_code_segment_options.segment_type        = GDT::SegmentType::Code;
+    kernel_code_segment_options.code_segment        = GDT::CodeSegmentType::ExecuteRead;
 
+    gdt.configure(GDT::DescriptorTable::SegmentLabel::KernelCode, kernel_code_segment_options);
+   
     GDT::SegmentOptions kernel_data_segment_options;
-    kernel_data_segment_options.base = 0;
-    kernel_data_segment_options.limit = 0xFFFF; // Big number
-    kernel_data_segment_options.descriptor_type = GDT::DescriptorType::CodeOrData;
-    kernel_data_segment_options.granularity = GDT::Granularity::FourKilobytes;
-    kernel_data_segment_options.long_mode = GDT::LongMode::Enabled;
-    kernel_data_segment_options.operation_size = GDT::OperationSize::Bits16;
-    kernel_data_segment_options.present = GDT::Present::Yes;
-    kernel_data_segment_options.privilege_level = GDT::PrivilegeLevel::Ring0;
+    kernel_data_segment_options.base                = 0;
+    kernel_data_segment_options.limit               = 0xFFFF; // Big number
+    kernel_data_segment_options.descriptor_type     = GDT::DescriptorType::CodeOrData;
+    kernel_data_segment_options.granularity         = GDT::Granularity::FourKilobytes;
+    kernel_data_segment_options.long_mode           = GDT::LongMode::Enabled;
+    kernel_data_segment_options.operation_size      = GDT::OperationSize::Bits16;
+    kernel_data_segment_options.present             = GDT::Present::Yes;
+    kernel_data_segment_options.privilege_level     = GDT::PrivilegeLevel::Ring0;
     kernel_data_segment_options.system_availability = GDT::SystemAvailability::NotAvailable;
-    kernel_data_segment_options.segment_type = GDT::SegmentType::Code;
-    kernel_data_segment_options.code_segment = GDT::CodeSegmentType::ExecuteRead;
+    kernel_data_segment_options.segment_type        = GDT::SegmentType::Data;
+    kernel_data_segment_options.data_segment        = GDT::DataSegmentType::ReadWrite;
 
-    gdt.initialize(null_segment_options, kernel_code_segment_options, kernel_data_segment_options);
+    gdt.configure(GDT::DescriptorTable::SegmentLabel::KernelData, kernel_data_segment_options);
+
+    gdt.init_ptr();
 
     call_set_gdt(*gdt.GetPtr());
 }

@@ -13,7 +13,16 @@ namespace GDT {
             uint16_t limit;
             uint64_t base;
         } __attribute__((packed));
-        
+
+        enum class SegmentLabel : size_t
+        {
+            Null        = 0,
+            KernelCode  = 1, 
+            KernelData  = 2,
+            UserCode    = 3,
+            UserData    = 4,
+        };
+
         public:
         DescriptorTable();
         ~DescriptorTable();
@@ -22,10 +31,9 @@ namespace GDT {
 
         void init_ptr();
 
-        
-        void initialize(const auto ...options);
+        void configure(SegmentLabel label, SegmentOptions options);
 
-        void set_entry(int index, uint32_t base, uint32_t limit);
+        void initialize(const auto ...options);
 
         inline EntryPtr* GetPtr() { return &entry_ptr;}
 
