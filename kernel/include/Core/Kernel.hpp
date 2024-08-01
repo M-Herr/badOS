@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/GlobalDescriptorTable.hpp"
-#include "Core/IDT.hpp"
+#include "Core/Structures/GDT/GlobalDescriptorTable.hpp"
+
 #include "Core/FrameBuffer.hpp"
 
 class Kernel
@@ -18,9 +18,7 @@ class Kernel
 
     void intialize_gdt();
 
-    GlobalDescriptorTable gdt;
-
-    InterruptDescriptorTable idt;
+    GDT::DescriptorTable gdt;
 
     FrameBuffer frame_buffer;
     

@@ -114,4 +114,24 @@ namespace blib {
         return dst;
     }
 
+    // Base template for index_sequence
+    template<size_t... Indices>
+    struct index_sequence {
+        using type = index_sequence;
+        static constexpr size_t size() noexcept { return sizeof...(Indices); }
+    };
+
+    // Helper template for generating index_sequence
+    template<size_t N, size_t... Indices>
+    struct make_index_sequence_helper : make_index_sequence_helper<N - 1, N - 1, Indices...> {};
+
+    // Specialization for base case
+    template<size_t... Indices>
+    struct make_index_sequence_helper<0, Indices...> {
+        using type = index_sequence<Indices...>;
+    };
+
+    // Alias template for easier usage
+    template<size_t N>
+    using make_index_sequence = typename make_index_sequence_helper<N>::type;
 }
