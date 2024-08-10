@@ -1,4 +1,4 @@
-docker build buildenv -t myos-buildenv
+docker build buildenv -t bados-buildenv
 
 docker run --rm -it -v "$(pwd)":/root/env bados-buildenv
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "Types.hpp"
-#include "C++/type_traits.hpp"
+#include <Types.hpp>
 #include "C++/enum_bitmask.hpp"
+#include "C++/type_traits.hpp"
 
 enum class VGAColors : uint8_t
 {
@@ -23,14 +23,20 @@ enum class VGAColors : uint8_t
     White
 };
 
+inline uint8_t MakeColor(VGAColors fg, VGAColors bg)
+{
+    return (static_cast<uint8_t>(bg) << 4) | static_cast<uint8_t>(fg);
+};
+
 template<>
 struct FEnableBitMaskOperators<VGAColors> {
     static constexpr bool enable = true;
 };
 
-struct VGAProperties
+
+
+struct TextModeCursor
 {
-    static constexpr uint64_t start_address = 0xb8000; 
-    static constexpr uint64_t width = 80;
-    static constexpr uint64_t height = 25;
+    uint32_t x;
+    uint32_t y;
 };

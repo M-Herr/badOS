@@ -1,10 +1,27 @@
-#include "Core/ISR.hpp"
+#include "Core/Structures/IDT/ISR.hpp"
+
+#include "Core/TextDrawable.hpp"
 
 
-extern "C"
+namespace ISR 
 {
-    void default_isr_handler()
-    {
-        //__asm__ volatile ("cli; hlt");
+    extern "C"{
+        __attribute__((interrupt))
+        void general_interrupt_handler(struct stack_frame* frame)
+        {
+            HandleFault(frame);
+        }
     }
+
+    
+
+    void HandleFault(struct stack_frame* frame)
+    {
+        while(true)
+        {
+            
+        }
+
+    }
+
 }

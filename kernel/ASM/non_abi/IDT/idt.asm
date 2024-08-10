@@ -1,19 +1,19 @@
 %macro isr_err_stub 1
 global isr_stub_%+%1
 isr_stub_%+%1:
-    call default_isr_handler
+    call general_interrupt_handler
     iretq
 %endmacro
 
 %macro isr_no_err_stub 1
 global isr_stub_%+%1
 isr_stub_%+%1:
-    call default_isr_handler
+    call general_interrupt_handler
     iretq
 %endmacro
 
 
-extern default_isr_handler
+extern general_interrupt_handler
 
 ; Define ISR stubs
 isr_no_err_stub 0

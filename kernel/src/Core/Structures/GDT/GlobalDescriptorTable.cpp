@@ -14,11 +14,6 @@ namespace GDT {
         
     }
 
-    void DescriptorTable::initialize(const auto ...options)
-    {
-
-    }    
-
     void DescriptorTable::init_ptr()
     {
         entry_ptr.limit = (sizeof(Entry) * gdt_entries) - 1;
@@ -29,7 +24,6 @@ namespace GDT {
     {   
         size_t index = blib::underlying_type_t<SegmentLabel>(label);
         entries[index].initialize(options);
-
     }
 
 }

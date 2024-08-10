@@ -65,12 +65,13 @@ enum class byte : unsigned char {};
         return static_cast<IntegerType>(b);
     }
 
+    // U = from, T = to, N = How many bits, Pos = starting position
     template <typename T, typename U, size_t N, size_t Pos>
     T extractBits(U value) {
         static_assert(N > 0 && N <= 64, "Number of bits to extract must be between 1 and 64");
         
         // Create a mask with N bits set to 1
-        U mask = (1U << N) - 1;
+        U mask = (1UL << N) - 1UL;
         
         // Shift the mask to the correct position and apply it to the value
         return static_cast<T>((value >> Pos) & mask);

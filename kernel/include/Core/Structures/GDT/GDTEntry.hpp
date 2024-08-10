@@ -3,11 +3,7 @@
 #include "C++/byte.hpp"
 #include "GlobalDescriptorUtils.hpp"
 
-#define ENABLE_BM(name) \
-    template<> \
-    struct FEnableBitMaskOperators<name> { \
-        static constexpr bool enable = true; \
-    }; 
+
 
 namespace GDT {
 

@@ -8,7 +8,7 @@ namespace GDT {
     class DescriptorTable 
     {
         public:
-        static constexpr size_t gdt_entries = 3;
+        static constexpr size_t gdt_entries = 7;
         struct EntryPtr {
             uint16_t limit;
             uint64_t base;
@@ -17,10 +17,12 @@ namespace GDT {
         enum class SegmentLabel : size_t
         {
             Null        = 0,
-            KernelCode  = 1, 
-            KernelData  = 2,
-            UserCode    = 3,
-            UserData    = 4,
+            KernelCode16 = 1,
+            KernelData16 = 2,
+            KernelCode32 = 3,
+            KernelData32 = 4,
+            KernelCode64 = 5, 
+            KernelData64 = 6
         };
 
         public:
@@ -33,8 +35,10 @@ namespace GDT {
 
         void configure(SegmentLabel label, SegmentOptions options);
 
-        void initialize(const auto ...options);
-
+        Entry& get_segment(SegmentLabel label) { 
+             size_t index = blib::underlying_type_t<SegmentLabel>(label);
+             return entries[index];
+             }
         inline EntryPtr* GetPtr() { return &entry_ptr;}
 
         private:

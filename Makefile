@@ -18,11 +18,11 @@ endef
 # It is suggested to use a custom built cross toolchain to build a kernel.
 # We are using the standard "cc" here, it may work by using
 # the host system's toolchain, but this is not guaranteed.
-override DEFAULT_KCC := clang++
+override DEFAULT_KCC := clang-15
 $(eval $(call DEFAULT_VAR,KCC,$(DEFAULT_KCC)))
 
 # Same thing for "ld" (the linker).
-override DEFAULT_KLD := ld.lld
+override DEFAULT_KLD := ld.lld-15
 $(eval $(call DEFAULT_VAR,KLD,$(DEFAULT_KLD)))
 
 # User controllable C flags.
@@ -92,7 +92,8 @@ override KCXXFLAGS += \
 	-I. \
 	-fno-rtti \
 	-fno-exceptions \
-	-O0
+	-O0 \
+	-mcmodel=kernel
 
 # Internal linker flags that should not be changed by the user.
 override KLDFLAGS += \
@@ -100,7 +101,8 @@ override KLDFLAGS += \
 	-nostdlib \
 	-z text \
 	-z max-page-size=0x1000 \
-	-T bootloader/limine/linker.ld
+	-T bootloader/limine/linker.ld \
+	-M
 
 # Internal nasm flags that should not be changed by the user.
 override KNASMFLAGS += \
@@ -121,6 +123,8 @@ override NASM_OBJS := $(addprefix obj/ASM/non_abi/, $(NASMFILES:.asm=.asm.o))
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(CXXFILES:.cpp=.cpp.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d) $(CXXFILES:.cpp=.cpp.d))
 
+FONT_FILES = $(shell cd kernel/font_objects && find -L * -type f -name '*.o')
+FONT_OBJ = $(addprefix kernel/font_objects/, $(FONT_FILES))
 
 CRTI_FILE := $(addprefix kernel/ASM/abi/global_constructors/, $(shell cd kernel/ASM/abi/global_constructors && find -L * -type f -name crti.asm))
 CRTN_FILE := $(addprefix kernel/ASM/abi/global_constructors/, $(shell cd kernel/ASM/abi/global_constructors && find -L * -type f -name crtn.asm))
@@ -128,7 +132,7 @@ CRTN_FILE := $(addprefix kernel/ASM/abi/global_constructors/, $(shell cd kernel/
 CRTI_OBJ =  $(addprefix obj/, $(CRTI_FILE:.asm=.asm.o))
 CRTN_OBJ =  $(addprefix obj/, $(CRTN_FILE:.asm=.asm.o))
 
-OBJECTS = $(CRTI_OBJ) $(NASM_OBJS) $(OBJ) $(CRTN_OBJ)
+OBJECTS = $(CRTI_OBJ) $(NASM_OBJS) $(FONT_OBJ) $(OBJ)  $(CRTN_OBJ) 
 #$(info $(NASMFILES))
 #$(error $(NASM_OBJS))
 
@@ -148,6 +152,7 @@ bin/$(KERNEL): bootloader/limine/linker.ld $(OBJECTS)
 #$(error $(NASM_OBJS))
 # Include header dependencies.
 -include $(HEADER_DEPS)
+
 
 # Compilation rules for *.c files.
 obj/%.cpp.o: kernel/%.cpp

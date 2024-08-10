@@ -5,3 +5,5 @@ badOS
 badOS.elf
 *.img
 boot
+build/*
+image.iso

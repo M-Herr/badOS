@@ -1,12 +1,13 @@
 #include "C++/ABI/icxxabi.hpp"
-#include "Hardware/VGA/VGA.hpp"
+#include "C++/init.hpp"
+#include "Core/Interfaces/ScreenManager.hpp"
 #include "bootloader/limine/limine.h"
 #include "C/cmemory.hpp"
 
 #include "Core/Kernel.hpp"
 
+constexpr int32_t BITMAP_SIZE =  1 << 20;
 
-VGATextWriter writer;
 Kernel kernel;
 
 extern "C" {
@@ -23,11 +24,6 @@ extern "C" {
     // be made volatile or equivalent, _and_ they should be accessed at least
     // once or marked as used with the "used" attribute as done here.
 
-    __attribute__((used, section(".requests")))
-    static volatile struct limine_framebuffer_request framebuffer_request = {
-        .id = LIMINE_FRAMEBUFFER_REQUEST,
-        .revision = 0
-    };
 
     __attribute__((used, section(".requests")))
     static volatile struct limine_memmap_request memorymap_request = {
@@ -37,7 +33,22 @@ extern "C" {
 
     // Finally, define the start and end markers for the Limine requests.
     // These can also be moved anywhere, to any .c file, as seen fit.
+    __attribute__((used, section(".requests")))
+    static volatile struct limine_hhdm_request hhdm_request = {
+        .id = LIMINE_HHDM_REQUEST,
+        .revision = 0
 
+    };
+    
+    __attribute__((used, section(".requests")))
+    static volatile struct limine_paging_mode_request paging_mode_request = {
+        .id = LIMINE_PAGING_MODE_REQUEST,
+        .revision = 0,
+        .mode = LIMINE_PAGING_MODE_DEFAULT,
+        .max_mode = LIMINE_PAGING_MODE_MAX,
+        .min_mode = LIMINE_PAGING_MODE_MIN
+    };
+    
     __attribute__((used, section(".requests_start_marker")))
     static volatile LIMINE_REQUESTS_START_MARKER;
 
@@ -54,34 +65,36 @@ extern "C" {
     
     void kernel_main()
     {
-        
-        
+        _init();
 
             // Ensure the bootloader actually understands our base revision (see spec).
         if (LIMINE_BASE_REVISION_SUPPORTED == false) {
             hcf();
         }
 
-        // Ensure we got a framebuffer.
-        if (framebuffer_request.response == nullptr
-        || framebuffer_request.response->framebuffer_count < 1) {
-            hcf();
-        }
-
-        // Fetch the first framebuffer.
-        struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-        
-        kernel.get_framebuffer_properties(framebuffer);
-        
-        if(memorymap_request.response == nullptr
-        || memorymap_request.response->entry_count < 1)
+       
+        if(hhdm_request.response == nullptr || hhdm_request.response->offset == 0)
         {
-            hcf();
+            //DO a thing
         }
-        
-        kernel.intialize_gdt();
+  
+        if(paging_mode_request.response != nullptr)
+        {
+            //Do a thing!
+        }
+      
+  
+        kernel.initialize_screenmanager();
 
+        kernel.initialize_framebuffer();
+
+         kernel.intialize_gdt();
+     
         kernel.initialize_idt();
+
+        kernel.initialize_memory(memorymap_request.response);
+
+        kernel.initialize_paging();
 
         kernel.run();
 

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <Types.hpp>
+#include "Core/Memory/Constants.hpp"
 #include "Core/Structures/IDT/IDTEntry.hpp"
-#include "Core/ISR.hpp"
+#include "Core/Structures/IDT/ISR.hpp"
 
 namespace IDT {
-struct IDTPointer 
+struct EntryPtr 
 {
     uint16_t limit;
     uint64_t base;
@@ -18,22 +19,27 @@ class InterruptDescriptorTable
     constexpr static size_t number_of_entries = 256;
 
     public:
+     
     InterruptDescriptorTable();
 
     ~InterruptDescriptorTable();
 
-    void set_entry(uint8_t index, ISRBase* isr, uint8_t flags);
+    void set_entry(size_t index, GateOptions options);
 
     void load();
 
     void initialize();
     
-    IDTPointer* get_idt_ptr() { return &idt_ptr;}
+    void init_ptr();
+
+    void configure(GateOptions options);
+
+    EntryPtr* get_idt_ptr() { return &entry_ptr;}
 
     private:
-    IDTPointer idt_ptr;
-    //IDTGateDescriptor entries[number_of_entries];
-    ISRBase* isr[number_of_entries];
+    Entry entries[number_of_entries];
+    EntryPtr entry_ptr;
+    
 
 };
 

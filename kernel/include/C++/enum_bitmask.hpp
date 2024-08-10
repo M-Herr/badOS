@@ -84,3 +84,10 @@ operator~(E lhs)
         ~static_cast<blib::underlying_type_t<E>>(lhs)
     );
 }
+
+
+#define ENABLE_BM(name) \
+template<> \
+struct FEnableBitMaskOperators<name> { \
+    static constexpr bool enable = true; \
+};

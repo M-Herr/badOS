@@ -10,6 +10,7 @@ mkdir -p iso_root
 # Copy the relevant files over.
 rm -rf iso_root/boot
 mkdir -p iso_root/boot
+cp kernel/external/* iso_root/
 cp -v bin/bados iso_root/boot/
 mkdir -p iso_root/boot/limine
 cp -v bootloader/limine/limine.cfg limine/limine-bios.sys limine/limine-bios-cd.bin \

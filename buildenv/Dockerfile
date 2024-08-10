@@ -9,6 +9,7 @@ RUN apt-get update && \
     build-essential \
     clang-15 \
     llvm-15 \
+    llvm-15-dev \
     lld-15 \
     nasm \
     qemu \
@@ -22,9 +23,6 @@ RUN apt-get update && \
     automake \
     libtool \
     texinfo \
-    grub-common \
-    grub-pc-bin \
-    grub-efi-amd64-bin \
     xorriso \
     cmake \
     mtools
